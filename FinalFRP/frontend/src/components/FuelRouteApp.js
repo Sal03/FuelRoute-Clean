@@ -74,7 +74,7 @@ const FuelRouteApp = ({ backendAPI, apiStatus }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState({});
-  const [fuelTypes, setFuelTypes] = useState([]);
+  const [fuelTypes, setFuelTypes] = useState(['hydrogen', 'methanol', 'ammonia']);
   const [routeHistory, setRouteHistory] = useState([]);
   const [localApiStatus, setLocalApiStatus] = useState('checking');
   const [routeInsights, setRouteInsights] = useState('');
@@ -155,6 +155,8 @@ const FuelRouteApp = ({ backendAPI, apiStatus }) => {
         console.error('Failed to initialize app:', error);
         setLocalApiStatus('error');
         setError('Unable to connect to backend server. Make sure it\'s running on port 5001.');
+        // Ensure fuel types are always available even if API fails
+        setFuelTypes(['hydrogen', 'methanol', 'ammonia']);
       }
     };
 
@@ -883,6 +885,7 @@ const validateLocationBasic = (location, fieldName) => {
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
+                  {console.log('🔍 Fuel Types:', fuelTypes)}
                   {fuelTypes.map(type => (
                     <option key={type} value={type}>
                       {type.charAt(0).toUpperCase() + type.slice(1)}

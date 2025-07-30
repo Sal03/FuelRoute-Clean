@@ -174,14 +174,9 @@ function App() {
             FuelRoute Pro
             <div className="logo-subtitle">By THAMPICO</div>
           </div>
-          <nav>
-            <ul className="nav-menu">
-              <li><a href="#calculator">Calculator</a></li>
-              <li><a href="https://www.thampico.com/about" target="_blank" rel="noopener noreferrer">About</a></li>
-            </ul>
-          </nav>
+          
           <div className="header-right">
-            <div className="search-icon">🔍</div>
+            <div className="search-icon"></div>
             <a href="#calculator" className="cta-button">Try Calculator</a>
           </div>
         </div>
@@ -205,7 +200,7 @@ function App() {
                 <div className="stat-label">Alternative Fuels</div>
               </div>
               <div className="stat-item">
-                <div className="stat-number">4</div>
+                <div className="stat-number">2</div>
                 <div className="stat-label">Transport Modes</div>
               </div>
               <div className="stat-item">
@@ -257,9 +252,7 @@ function App() {
             <div className="social-links">
               <a href="mailto:info@thampico.com" title="Email">📧</a>
               <a href="https://www.linkedin.com/company/thampico/" target="_blank" rel="noopener noreferrer" title="LinkedIn">💼</a>
-              <a href="#github" title="GitHub">💻</a>
-              <a href="#youtube" title="YouTube">📺</a>
-              <a href="#instagram" title="Instagram">📷</a>
+            
             </div>
           </div>
           
