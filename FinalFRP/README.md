@@ -19,3 +19,13 @@ Set `OPENAI_PRICE_CACHE_MS` to control how long fuel price estimates are cached.
 The default is 900000 (15 minutes). Use `0` to disable caching entirely.
 
 Fuel prices are fetched in real time from OpenAI using a prompt that requests the latest US market value. The response includes the price, date and source so you can verify the data.
+
+### OpenAI Setup
+
+If you see messages like `OpenAI service not available`, create a `.env` file with your API key. Run:
+
+```
+npm run setup
+```
+
+and follow the prompts to add `OPENAI_API_KEY` and other settings.
