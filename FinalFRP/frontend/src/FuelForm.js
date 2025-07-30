@@ -11,7 +11,7 @@ const FuelForm = ({ backendAPI, apiStatus }) => {
     intermediateHub: '',
     destination: '',
     transportMode1: 'truck',
-    transportMode2: 'ship',
+    transportMode2: 'rail',
     preference: 'cost'
   });
 
@@ -63,8 +63,7 @@ const FuelForm = ({ backendAPI, apiStatus }) => {
 
   const transportModes = [
     { value: 'truck', label: 'Truck' },
-    { value: 'rail', label: 'Rail' },
-    { value: 'ship', label: 'Ship' }
+    { value: 'rail', label: 'Rail' }
   ];
 
   const handleChange = (e) => {

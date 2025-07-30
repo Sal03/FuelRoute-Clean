@@ -130,8 +130,7 @@ const FuelRouteApp = ({ backendAPI, apiStatus }) => {
 
   const transportModes = [
     { value: 'truck', label: 'Truck', suitable: ['local', 'regional'] },
-    { value: 'rail', label: 'Rail', suitable: ['regional', 'continental'] },
-    { value: 'ship', label: 'Ship', suitable: ['continental', 'international'] }
+    { value: 'rail', label: 'Rail', suitable: ['regional', 'continental'] }
   ];
 
   // Check API health on component mount
@@ -256,7 +255,7 @@ const validateLocationBasic = (location, fieldName) => {
     if (!result.transportMode?.suitable) {
       insights.push(`⚠️ ${transportMode} transport may not be available at this location`);
     } else if (result.transportMode.infrastructure === 'major_port') {
-      insights.push(`🚢 Major port - excellent for ship transport`);
+      insights.push('Major port facility');
     } else if (result.transportMode.infrastructure === 'major_rail_hub') {
       insights.push(`🚂 Major rail hub - excellent for rail transport`);
     }
@@ -264,8 +263,8 @@ const validateLocationBasic = (location, fieldName) => {
     // Fuel-specific insights
     if (result.fuelRequirements) {
       const reqs = result.fuelRequirements.requirements;
-      if (fuelType === 'hydrogen' && transportMode === 'ship') {
-        insights.push(`❄️ Cryogenic facilities required for hydrogen`);
+      if (fuelType === 'hydrogen') {
+        insights.push('❄️ Cryogenic facilities required for hydrogen');
       } else if (fuelType === 'ammonia') {
         insights.push(`🧊 Refrigerated storage required for ammonia`);
       }
@@ -433,7 +432,7 @@ const validateLocationBasic = (location, fieldName) => {
       
       // Validate transport modes with AI insights
       if (routeType === 'international' && formData.transportMode1 === 'truck' && !formData.intermediateHub) {
-        errors.transport = 'International truck transport requires an intermediate hub or consider ship transport for cross-continental delivery';
+        errors.transport = 'International truck transport requires an intermediate hub or consider rail transport for cross-continental delivery';
       }
       
       if (originInfo?.type === 'port' && destInfo?.type === 'port' && formData.transportMode1 === 'truck') {
@@ -950,7 +949,7 @@ const validateLocationBasic = (location, fieldName) => {
                   value={formData.origin}
                   onChange={handleInputChange}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter origin (e.g., Los Angeles, CA or Mumbai, India)"
+                  placeholder="Enter origin (e.g., Los Angeles, CA)"
                   required
                   list="origin-suggestions"
                 />
@@ -1030,7 +1029,7 @@ const validateLocationBasic = (location, fieldName) => {
                   value={formData.intermediateHub}
                   onChange={handleInputChange}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter intermediate hub (e.g., Singapore or Rotterdam, Netherlands)"
+                  placeholder="Enter intermediate hub (optional)"
                   list="hub-suggestions"
                 />
                 <datalist id="hub-suggestions">

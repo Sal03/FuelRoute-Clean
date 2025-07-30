@@ -145,8 +145,6 @@ async function calculateBasicCost(volume, distance, mode, fuelType) {
       result = calculateTruckCost(validVolume, validDistance, fuelType, transportFactors, aiEnhanced);
     } else if (mode === 'rail') {
       result = calculateRailCost(validVolume, validDistance, fuelType, transportFactors, aiEnhanced);
-    } else if (mode === 'ship') {
-      result = calculateShipCost(validVolume, validDistance, fuelType, transportFactors, aiEnhanced);
     } else {
       // Fallback for unknown modes
       result = calculateGenericCost(validVolume, validDistance, mode, fuelType, aiEnhanced);
@@ -293,61 +291,6 @@ function calculateRailCost(volume, distance, fuelType, transportFactors, aiEnhan
 }
 
 // ✅ NEW: Ship cost calculation - FIXED for NaN issues
-function calculateShipCost(volume, distance, fuelType, transportFactors, aiEnhanced) {
-  try {
-    let rate = 0.08; // Base rate per tonne-mile
-    let fuelMultiplier = getFuelMultiplier(fuelType);
-    
-    // Apply AI factors if available
-    if (transportFactors && typeof transportFactors === 'object' && !transportFactors.error) {
-      if (validateNumber(transportFactors.base_rate_per_mile)) {
-        rate = Math.max(0.05, Math.min(0.15, transportFactors.base_rate_per_mile / 20)); // Convert to per-tonne-mile
-      }
-      if (validateNumber(transportFactors.fuel_surcharge)) {
-        fuelMultiplier *= (1 + transportFactors.fuel_surcharge);
-      }
-      if (validateNumber(transportFactors.special_handling_multiplier)) {
-        fuelMultiplier *= transportFactors.special_handling_multiplier;
-      }
-    }
-    
-    // Distance optimization for ship (very efficient at long distances)
-    let distanceMultiplier = 1.0;
-    if (distance > 2000) {
-      distanceMultiplier = 0.8; // Major efficiency at very long distances
-    } else if (distance > 1000) {
-      distanceMultiplier = 0.9; // Some efficiency at long distances
-    }
-    
-    const transportCost = distance * rate * volume * fuelMultiplier * distanceMultiplier;
-    const portFees = volume * 75; // $75 per tonne port handling
-    const totalCost = transportCost + portFees;
-    
-    console.log(`🚢 Ship cost breakdown:`, {
-      rate: `$${rate}/tonne-mile`,
-      fuelMultiplier: fuelMultiplier.toFixed(2),
-      distanceMultiplier: distanceMultiplier.toFixed(2),
-      transportCost: `$${transportCost.toFixed(2)}`,
-      portFees: `$${portFees.toFixed(2)}`,
-      totalCost: `$${totalCost.toFixed(2)}`,
-      aiEnhanced
-    });
-    
-    return {
-      cost: validateNumber(totalCost, 'ship cost', 300),
-      aiEnhanced,
-      aiFactors: transportFactors || { note: 'Static ship pricing' }
-    };
-  } catch (error) {
-    console.error('❌ Ship cost calculation error:', error);
-    const fallbackCost = calculateRealisticFallback(volume, distance, 'ship', fuelType);
-    return {
-      cost: fallbackCost,
-      aiEnhanced: false,
-      aiFactors: { error: error.message }
-    };
-  }
-}
 
 // ✅ NEW: Generic cost calculation for unknown modes
 function calculateGenericCost(volume, distance, mode, fuelType, aiEnhanced) {
@@ -409,8 +352,7 @@ const cityDatabase = {
 // ✅ Use realistic market rates
 const transportRates = {
   truck: 0.25,    // $0.25 per tonne-mile 
-  rail: 0.15,     // $0.15 per tonne-mile  
-  ship: 0.08,     // $0.08 per tonne-mile
+  rail: 0.15,     // $0.15 per tonne-mile
   pipeline: 0.05  // $0.05 per tonne-mile
 };
 
@@ -460,14 +402,6 @@ function calculateRealisticFallback(volume, distance, mode, fuelType) {
       console.log(`   Rail fallback: ${validDistance} miles × $${rate}/tonne-mile × ${validVolume} tonnes × ${fuelMultiplier} = $${cost.toFixed(2)}`);
       return Math.round(cost * 100) / 100;
       
-    } else if (mode === 'ship') {
-      // Realistic ship calculation
-      const rate = 0.08; // $0.08 per tonne-mile
-      const fuelMultiplier = fuelType === 'hydrogen' ? 1.4 : 1.2;
-      const cost = validDistance * rate * validVolume * fuelMultiplier;
-      console.log(`   Ship fallback: ${validDistance} miles × $${rate}/tonne-mile × ${validVolume} tonnes × ${fuelMultiplier} = $${cost.toFixed(2)}`);
-      return Math.round(cost * 100) / 100;
-      
     } else {
       // Generic fallback
       const cost = validDistance * 0.1 * validVolume * 1.2;
@@ -493,9 +427,8 @@ function getCommodityCost(fuelType, volume, openaiPrice = null) {
     console.log(`💰 Using OpenAI price: $${openaiPrice}/tonne`);
   }
   
-  // Add realistic market fluctuation (±3%)
-  const marketVariation = 1 + (Math.random() - 0.5) * 0.06; // ±3% variation
-  const currentPrice = basePrice * marketVariation;
+  // Use the price directly without any artificial adjustment
+  const currentPrice = basePrice;
   
   const totalCommodityCost = currentPrice * volume;
   
@@ -518,14 +451,6 @@ function calculateRailTransitTime(distance) {
   return Math.max(2, totalDays);
 }
 
-function calculateShipTransitTime(distance) {
-  const transitDays = Math.ceil(distance / (17 * 24)); // 17 mph average
-  const portProcessing = 3; // Days for port processing
-  const totalDays = transitDays + portProcessing;
-  
-  console.log(`🚢 Ship time: ${distance} miles ÷ 408 miles/day = ${transitDays} days + ${portProcessing} port time = ${totalDays} days`);
-  return Math.max(3, totalDays);
-}
 
 // ✅ UPDATED: Enhanced deterministic distance calculation with specific US route knowledge
 function estimateDistanceFromNames(origin, destination) {
@@ -627,7 +552,7 @@ async function generateRouteOptions(routeData) {
       origin, 
       destination, 
       fuelType, 
-      preferredModes.length > 0 ? preferredModes : ['truck', 'rail', 'ship']
+      preferredModes.length > 0 ? preferredModes : ['truck', 'rail']
     );
     
     console.log(`✅ Routing service found ${routeOptions.routes.length} route options`);
@@ -775,8 +700,6 @@ function generateRouteAdvantages(route) {
     advantages.push('Fast delivery', 'Door-to-door service', 'Flexible scheduling');
   } else if (route.mode === 'rail') {
     advantages.push('Environmentally friendly', 'High capacity', 'Weather independent');
-  } else if (route.mode === 'ship') {
-    advantages.push('Lowest cost per tonne', 'Highest capacity', 'Established routes');
   } else if (route.mode === 'pipeline') {
     advantages.push('Continuous flow', 'Lowest operating cost', 'Weather independent');
   }
@@ -847,7 +770,6 @@ function getEstimatedSpeed(transportMode) {
   const speeds = {
     truck: 55,
     rail: 25,
-    ship: 17,
     pipeline: 100
   };
   return speeds[transportMode] || 30;
@@ -892,7 +814,6 @@ function getCachedDistance(origin, destination, transportMode, baseDistance) {
   const modeMultipliers = {
     truck: 1.0,     // Direct route
     rail: 1.15,     // Rail network routing (+15%)
-    ship: 1.8,      // Coastal routing (+80% for cross-country)
     pipeline: 0.92  // More direct underground (-8%)
   };
   
@@ -1108,69 +1029,6 @@ async function generateRailOption(routeData, baseDistance) {
   }
 }
 
-// ✅ UPDATED: Ship option with all-in pricing
-async function generateShipOption(routeData, baseDistance) {
-  const { volume, fuelType, origin, destination } = routeData;
-  
-  try {
-    const shipDistance = await calculateDistance(origin, destination, 'ship');
-    
-    const costResult = await calculateBasicCost(volume, shipDistance, 'ship', fuelType);
-    const transportCost = typeof costResult === 'object' ? costResult.cost : costResult;
-    const aiEnhanced = typeof costResult === 'object' ? costResult.aiEnhanced : false;
-    const aiFactors = typeof costResult === 'object' ? costResult.aiFactors : null;
-    
-    // ✅ ADD COMMODITY COST
-    const commodityInfo = getCommodityCost(fuelType, volume, costResult.fuelPrice);
-    const allInCost = transportCost + commodityInfo.totalCost;
-    
-    return {
-      id: 'ship-direct',
-      type: 'direct',
-      name: 'Direct Ship Route',
-      transportModes: ['ship'],
-      estimatedTime: calculateShipTransitTime(shipDistance) + ' days',
-      
-      // ✅ SHOW ALL-IN COST
-      estimatedCost: allInCost,
-      
-      // ✅ ADD BREAKDOWN
-      costBreakdown: {
-        transportCost: transportCost,
-        commodityCost: commodityInfo.totalCost,
-        totalCost: allInCost
-      },
-      
-      distance: shipDistance,
-      riskLevel: 'medium',
-      description: `Coastal freight - All-in pricing including fuel${aiEnhanced ? ' - AI Enhanced' : ''}`,
-      advantages: ['Lower cost per tonne', 'High capacity', 'Environmentally friendly', 'Includes fuel cost'],
-      considerations: ['Requires port access', 'Longer transit time', 'Weather dependent'],
-      aiEnhanced: aiEnhanced,
-      aiFactors: aiFactors
-    };
-    
-  } catch (error) {
-    console.error('Ship option generation failed:', error);
-    // Fallback with commodity costs
-    const commodityInfo = getCommodityCost(fuelType, volume);
-    const fallbackTransportCost = calculateRealisticFallback(volume, baseDistance * 1.8, 'ship', fuelType);
-    
-    return {
-      id: 'ship-direct',
-      type: 'direct',
-      name: 'Direct Ship Route',
-      transportModes: ['ship'],
-      estimatedTime: calculateShipTransitTime(baseDistance * 1.8) + ' days',
-      estimatedCost: fallbackTransportCost + commodityInfo.totalCost,
-      distance: baseDistance * 1.8,
-      riskLevel: 'medium',
-      description: 'Coastal freight - All-in pricing including fuel',
-      aiEnhanced: false,
-      aiFactors: null
-    };
-  }
-}
 
 // ✅ UPDATED: Pipeline option with all-in pricing  
 async function generatePipelineOption(routeData, baseDistance) {
@@ -1687,11 +1545,6 @@ function calculateDetailedFallbackForRoute(routeOption, routeData) {
     terminalFees = baseTransportCost * 0.03;    // 3% for rail terminals  
     hubTransferFee = baseTransportCost * 0.02;  // 2% for rail yard transfers
     console.log('💰 Using rail-focused fee calculation');
-  } else if (routeOption.name.toLowerCase().includes('ship')) {
-    fuelHandlingFee = baseTransportCost * 0.04; // 4% for port handling
-    terminalFees = baseTransportCost * 0.05;    // 5% for port terminal fees
-    hubTransferFee = baseTransportCost * 0.01;  // 1% for port transfers
-    console.log('💰 Using ship-focused fee calculation');
   } else if (routeOption.name.toLowerCase().includes('pipeline')) {
     fuelHandlingFee = baseTransportCost * 0.02; // 2% for pipeline handling
     terminalFees = baseTransportCost * 0.01;    // 1% for connection terminals
@@ -1899,42 +1752,6 @@ async function generateTruckOptionsWithAI(volume, distance, fuelType, origin, de
   return options;
 }
 
-// AI-Enhanced ship option generation
-async function generateShipOptionWithAI(routeData, baseDistance) {
-  const { volume, fuelType, origin, destination } = routeData;
-  
-  try {
-    const shipDistance = await calculateDistance(origin, destination, 'ship');
-    let transportFactors = null;
-    
-    if (openaiService && openaiService.isAvailable) {
-      transportFactors = await openaiService.getTransportCostFactors('ship', fuelType, shipDistance);
-    }
-    
-    const estimatedCost = await calculateBasicCost(volume, shipDistance, 'ship', fuelType);
-    
-    return {
-      id: 'ship-direct-ai',
-      type: 'direct',
-      name: 'AI-Optimized Ship Route',
-      transportModes: ['ship'],
-      estimatedTime: calculateShipTransitTime(shipDistance) + ' days',
-      estimatedCost: estimatedCost,
-      distance: shipDistance,
-      riskLevel: 'medium',
-      description: 'AI-optimized maritime route with current market rates',
-      advantages: ['AI market pricing', 'Optimized shipping lanes', 'Weather-adjusted timing'],
-      considerations: ['Port access required', 'AI-estimated transit time', 'Market-adjusted rates'],
-      aiEnhanced: true,
-      aiFactors: transportFactors || { note: 'Using static rates - AI unavailable' }
-    };
-    
-  } catch (error) {
-    console.error('AI ship option generation failed:', error);
-    return generateShipOption(routeData, baseDistance);
-  }
-}
-
 // AI-Enhanced rail option generation
 async function generateRailOptionWithAI(routeData, baseDistance) {
   const { volume, fuelType, origin, destination } = routeData;
@@ -2017,32 +1834,6 @@ async function generateMultiModalOptionsWithAI(routeData, baseDistance) {
   
   try {
     // COMBINATION 1: AI-Optimized Truck + Ship
-    if (baseDistance > 1000) {
-      const shipDistance = await calculateDistance(origin, destination, 'ship');
-      const truckToPortDistance = Math.min(200, shipDistance * 0.1);
-      const oceanDistance = shipDistance * 0.8;
-      const portToDestinationDistance = shipDistance - truckToPortDistance - oceanDistance;
-      
-      const estimatedCost = await calculateMultiModalCost(volume, shipDistance, ['truck', 'ship'], fuelType);
-      
-      options.push({
-        id: 'truck-ship-ai',
-        type: 'multimodal',
-        name: 'AI-Optimized Truck + Ship',
-        transportModes: ['truck', 'ship'],
-        legs: [
-          { mode: 'truck', distance: truckToPortDistance, description: 'AI-optimized truck to port' },
-          { mode: 'ship', distance: oceanDistance, description: 'AI-scheduled coastal freight' },
-          { mode: 'truck', distance: portToDestinationDistance, description: 'AI-optimized port delivery' }
-        ],
-        estimatedTime: calculateShipTransitTime(shipDistance) + ' days',
-        estimatedCost: estimatedCost,
-        distance: Math.round(shipDistance),
-        riskLevel: 'medium',
-        description: 'AI-optimized intermodal route with dynamic pricing and scheduling',
-        aiEnhanced: true
-      });
-    }
     
     // COMBINATION 2: AI-Optimized Truck + Rail
     if (baseDistance > 600) {

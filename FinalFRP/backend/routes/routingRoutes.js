@@ -96,7 +96,7 @@ router.get('/test', async (req, res) => {
     };
 
     // Test each service individually
-    const services = ['truck', 'rail', 'ship'];
+    const services = ['truck', 'rail'];
     const sampleRoute = { origin: 'Houston, TX', destination: 'New Orleans, LA' };
 
     for (const service of services) {
@@ -219,7 +219,7 @@ router.post('/options', async (req, res) => {
       });
     }
 
-    const preferredModes = modes || ['truck', 'rail', 'ship'];
+    const preferredModes = modes || ['truck', 'rail'];
     console.log(`🗺️ API route options: ${origin} → ${destination} for ${fuelType}, modes: ${preferredModes.join(', ')}`);
 
     const routeOptions = await routingService.getRouteOptions(origin, destination, fuelType, preferredModes);
@@ -314,11 +314,11 @@ router.get('/services/:service', async (req, res) => {
   try {
     const { service } = req.params;
     
-    if (!['truck', 'rail', 'ship'].includes(service)) {
+    if (!['truck', 'rail'].includes(service)) {
       return res.status(400).json({
         success: false,
         error: 'Invalid service',
-        valid_services: ['truck', 'rail', 'ship']
+        valid_services: ['truck', 'rail']
       });
     }
 
@@ -336,13 +336,6 @@ router.get('/services/:service', async (req, res) => {
         name: 'US Rail Network',
         capabilities: ['Class I railroad routes', 'Terminal connections', 'Freight optimization'],
         coverage: 'United States',
-        api_required: 'None'
-      };
-    } else if (service === 'ship') {
-      serviceInfo = {
-        name: 'Maritime Shipping Routes',
-        capabilities: ['Coastal routes', 'Port-to-port', 'Shipping lanes'],
-        coverage: 'US Coastal and Great Lakes',
         api_required: 'None'
       };
     }
@@ -423,22 +416,7 @@ router.post('/visualization', async (req, res) => {
           let routePath = [origin, destination];
           let coordinates = [];
 
-          // If the primary mode is ship, attempt to use detailed coastal waypoints
-          if (primaryMode === 'ship') {
-            const key = `${origin}-${destination}`;
-            const reverseKey = `${destination}-${origin}`;
-            if (coastalRoutes[key] && coastalRoutes[key].waypoints.length > 0) {
-              routePath = coastalRoutes[key].waypoints;
-            } else if (coastalRoutes[reverseKey] && coastalRoutes[reverseKey].waypoints.length > 0) {
-              routePath = [...coastalRoutes[reverseKey].waypoints].reverse();
-            } else {
-              const start = locationCoordinates[origin];
-              const end = locationCoordinates[destination];
-              if (start && end) {
-                routePath = generateCoastalFallback(start, end);
-              }
-            }
-          }
+          // Additional processing for specific modes can be added here
           
           // Multi-modal routes have intermediate points
           if (route.type === 'multimodal' && route.legs) {
@@ -571,8 +549,7 @@ router.post('/visualization', async (req, res) => {
 function getTransportModeColor(mode) {
   const colors = {
     truck: '#2563eb',   // Blue
-    rail: '#dc2626',    // Red  
-    ship: '#059669',    // Green
+    rail: '#dc2626',    // Red
     pipeline: '#7c3aed' // Purple
   };
   return colors[mode] || colors.truck;
@@ -583,7 +560,6 @@ function getTransportModeIcon(mode) {
   const icons = {
     truck: '🚛',
     rail: '🚂',
-    ship: '🚢', 
     pipeline: '⛽'
   };
   return icons[mode] || icons.truck;
@@ -594,7 +570,6 @@ function getTransportModeLineStyle(mode) {
   const styles = {
     truck: { weight: 4, dashArray: null, opacity: 0.8 },
     rail: { weight: 6, dashArray: '10,5', opacity: 0.7 },
-    ship: { weight: 5, dashArray: '15,5,5,5', opacity: 0.8 },
     pipeline: { weight: 8, dashArray: null, opacity: 0.6 }
   };
   return styles[mode] || styles.truck;
@@ -660,7 +635,7 @@ router.get('/locations', async (req, res) => {
         name: 'Houston, TX',
         coordinates: [29.7604, -95.3698],
         type: 'major_port',
-        capabilities: ['truck', 'rail', 'ship', 'pipeline'],
+        capabilities: ['truck', 'rail', 'pipeline'],
         region: 'Gulf Coast',
         specialties: ['petrochemicals', 'LNG', 'crude_oil'],
         infrastructure: 'extensive'
@@ -669,7 +644,7 @@ router.get('/locations', async (req, res) => {
         name: 'New Orleans, LA',
         coordinates: [29.9511, -90.0715],
         type: 'major_port',
-        capabilities: ['truck', 'rail', 'ship', 'pipeline'],
+        capabilities: ['truck', 'rail', 'pipeline'],
         region: 'Gulf Coast',
         specialties: ['bulk_liquids', 'chemicals'],
         infrastructure: 'good'
@@ -680,7 +655,7 @@ router.get('/locations', async (req, res) => {
         name: 'Los Angeles, CA',
         coordinates: [34.0522, -118.2437],
         type: 'major_port',
-        capabilities: ['truck', 'rail', 'ship'],
+        capabilities: ['truck', 'rail'],
         region: 'West Coast',
         specialties: ['containers', 'fuel_imports'],
         infrastructure: 'extensive'
@@ -689,7 +664,7 @@ router.get('/locations', async (req, res) => {
         name: 'Long Beach, CA',
         coordinates: [33.7701, -118.1937],
         type: 'major_port',
-        capabilities: ['truck', 'rail', 'ship'],
+        capabilities: ['truck', 'rail'],
         region: 'West Coast',
         specialties: ['containers', 'fuel_distribution'],
         infrastructure: 'extensive'
@@ -698,7 +673,7 @@ router.get('/locations', async (req, res) => {
         name: 'Seattle, WA',
         coordinates: [47.6062, -122.3321],
         type: 'major_port',
-        capabilities: ['truck', 'rail', 'ship'],
+        capabilities: ['truck', 'rail'],
         region: 'Pacific Northwest',
         specialties: ['bulk_cargo', 'containers'],
         infrastructure: 'good'
@@ -709,7 +684,7 @@ router.get('/locations', async (req, res) => {
         name: 'New York/NJ',
         coordinates: [40.7128, -74.0060],
         type: 'major_port',
-        capabilities: ['truck', 'rail', 'ship'],
+        capabilities: ['truck', 'rail'],
         region: 'Northeast',
         specialties: ['containers', 'fuel_imports'],
         infrastructure: 'extensive'
@@ -718,7 +693,7 @@ router.get('/locations', async (req, res) => {
         name: 'Norfolk, VA',
         coordinates: [36.8468, -76.2852],
         type: 'major_port',
-        capabilities: ['truck', 'rail', 'ship'],
+        capabilities: ['truck', 'rail'],
         region: 'Southeast',
         specialties: ['coal', 'containers'],
         infrastructure: 'good'
@@ -800,7 +775,7 @@ router.get('/capabilities/:location', async (req, res) => {
     // This would normally query a database
     // For now, return capabilities based on location type
     const locationCapabilities = {
-      transport_modes: ['truck', 'rail', 'ship', 'pipeline'],
+      transport_modes: ['truck', 'rail', 'pipeline'],
       fuel_handling: {
         hydrogen: { cryogenic: true, compressed: true },
         methanol: { bulk_liquid: true, iso_tanks: true },
@@ -837,19 +812,16 @@ router.get('/fuel-compatibility/:fuelType', async (req, res) => {
       hydrogen: {
         truck: { compatible: true, requirements: ['Cryogenic equipment', 'Specialized trailers'] },
         rail: { compatible: true, requirements: ['Specialized railcars', 'Safety protocols'] },
-        ship: { compatible: true, requirements: ['Cryogenic tanks', 'Port facilities'] },
         pipeline: { compatible: false, reason: 'Limited hydrogen pipeline infrastructure' }
       },
       methanol: {
         truck: { compatible: true, requirements: ['Standard chemical transport'] },
         rail: { compatible: true, requirements: ['Chemical tank cars'] },
-        ship: { compatible: true, requirements: ['Chemical tankers'] },
         pipeline: { compatible: true, requirements: ['Compatible materials', 'Existing networks'] }
       },
       ammonia: {
         truck: { compatible: true, requirements: ['Refrigerated transport', 'Safety equipment'] },
         rail: { compatible: true, requirements: ['Pressurized cars', 'Safety protocols'] },
-        ship: { compatible: true, requirements: ['Refrigerated tanks', 'Specialized ports'] },
         pipeline: { compatible: true, requirements: ['Dedicated ammonia pipelines'] }
       }
     };
