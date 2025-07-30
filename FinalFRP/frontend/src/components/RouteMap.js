@@ -4,7 +4,6 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, LayersControl, Featur
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './RouteMap.css';
-import coastalRoutes from '../services/coastalRoutes';
 
 // Fix default markers (Leaflet + React issue)
 delete L.Icon.Default.prototype._getIconUrl;
@@ -140,19 +139,6 @@ const decodePolyline = (encoded) => {
   return coordinates;
 };
 
-// Retrieve coastal waypoints from the dataset when available
-const getCoastalWaypoints = (origin, destination) => {
-  const key = `${origin}-${destination}`;
-  const reverseKey = `${destination}-${origin}`;
-
-  if (coastalRoutes[key] && coastalRoutes[key].waypoints.length > 0) {
-    return coastalRoutes[key].waypoints;
-  }
-  if (coastalRoutes[reverseKey] && coastalRoutes[reverseKey].waypoints.length > 0) {
-    return [...coastalRoutes[reverseKey].waypoints].reverse();
-  }
-  return null;
-};
 
 // Generic coastal paths used when no specific route exists
 const coastalPaths = {
