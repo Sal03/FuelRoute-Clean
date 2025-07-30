@@ -2,7 +2,6 @@
 const express = require('express');
 const router = express.Router();
 const routingService = require('../services/routingService');
-const coastalRoutes = require('../data/coastalRoutes.json');
 
 // Generic coastal paths for fallback path generation
 const coastalPaths = {
