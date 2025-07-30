@@ -78,22 +78,16 @@ class OpenAIService {
 
         console.log(`🔍 Fetching current market price for ${fuelType} from OpenAI...`);
         
-        const prompt = `You are a commodity pricing expert. Provide the current realistic wholesale/industrial market price for ${fuelType} in USD per metric ton for January 2025.
-
-Current realistic market ranges:
-- Hydrogen (green): $2,000-3,500 per metric ton
-- Hydrogen (blue/grey): $1,500-2,500 per metric ton  
-- Methanol: $350-500 per metric ton (industrial grade)
-- Ammonia: $400-650 per metric ton (anhydrous industrial)
-- Gasoline: $650-750 per metric ton (wholesale)
-- Diesel: $700-800 per metric ton (wholesale)
+        const today = new Date().toISOString().split('T')[0];
+        const prompt = `You are a commodity pricing expert. Provide the most recent US market price for ${fuelType} in USD per metric ton as of ${today}. Base your answer on reputable industry sources such as Methanex, ICIS, CME, or EIA and specify the source and date.
 
 Respond with ONLY a JSON object in this exact format with NO additional text:
 {
-  "price": 2500,
+  "price": 320,
   "unit": "USD_per_metric_ton",
-  "confidence": "high",
-  "source": "market_estimate_2025"
+  "source": "source_name",
+  "date": "${today}",
+  "confidence": "medium"
 }`;
 
         const response = await this.client.chat.completions.create({
@@ -140,7 +134,8 @@ Respond with ONLY a JSON object in this exact format with NO additional text:
           price: finalPrice,
           unit: 'USD_per_ton',
           confidence: result.confidence || 'medium',
-          source: 'openai_realistic_market',
+          source: result.source || 'openai_realistic_market',
+          date: result.date || today,
           aiUsed: true
         };
         
@@ -163,8 +158,9 @@ Respond with ONLY a JSON object in this exact format with NO additional text:
         }
 
         console.log(`🔍 Fetching transport cost factors for ${transportMode} carrying ${fuelType} over ${distance} miles`);
-        
-        const prompt = `You are a transportation cost expert. Provide current market factors for transporting ${fuelType} via ${transportMode} over ${distance} miles as of January 2025.
+
+        const today = new Date().toISOString().split('T')[0];
+        const prompt = `You are a transportation cost expert. Provide current market factors for transporting ${fuelType} via ${transportMode} over ${distance} miles in the US as of ${today}.
 
 Consider:
 - Current fuel prices (diesel ~$3.50/gallon)
