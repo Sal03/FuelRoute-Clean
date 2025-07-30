@@ -6,10 +6,10 @@ async function testRoutingServices() {
   console.log('🧪 Testing Routing Services...\n');
 
   const testRoutes = [
-    { origin: 'Houston, TX', destination: 'New Orleans, LA', modes: ['truck', 'ship', 'pipeline'] },
+    { origin: 'Houston, TX', destination: 'New Orleans, LA', modes: ['truck', 'rail'] },
     { origin: 'Los Angeles, CA', destination: 'San Francisco, CA', modes: ['truck', 'rail'] },
-    { origin: 'New York/NJ', destination: 'Philadelphia, PA', modes: ['truck', 'rail', 'ship'] },
-    { origin: 'Chicago, IL', destination: 'St. Louis, MO', modes: ['truck', 'rail', 'pipeline'] }
+    { origin: 'New York/NJ', destination: 'Philadelphia, PA', modes: ['truck', 'rail'] },
+    { origin: 'Chicago, IL', destination: 'St. Louis, MO', modes: ['truck', 'rail'] }
   ];
 
   const fuelTypes = ['hydrogen', 'methanol', 'ammonia'];
@@ -64,7 +64,7 @@ async function testRoutingServices() {
       'Houston, TX',
       'Chicago, IL',
       'methanol',
-      ['truck', 'rail', 'ship', 'pipeline']
+      ['truck', 'rail']
     );
 
     console.log(`✅ Found ${routeOptions.routes.length} route options:`);
@@ -122,7 +122,7 @@ async function testRoutingServices() {
   console.log('='.repeat(60));
 
   const testLocations = [
-    { location: 'Houston, TX', modes: ['truck', 'rail', 'ship', 'pipeline'] },
+    { location: 'Houston, TX', modes: ['truck', 'rail'] },
     { location: 'Denver, CO', modes: ['truck', 'rail'] },
     { location: 'Invalid Location', modes: ['truck'] }
   ];

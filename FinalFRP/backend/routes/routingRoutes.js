@@ -549,8 +549,7 @@ router.post('/visualization', async (req, res) => {
 function getTransportModeColor(mode) {
   const colors = {
     truck: '#2563eb',   // Blue
-    rail: '#dc2626',    // Red
-    pipeline: '#7c3aed' // Purple
+    rail: '#dc2626'    // Red
   };
   return colors[mode] || colors.truck;
 }
@@ -559,8 +558,7 @@ function getTransportModeColor(mode) {
 function getTransportModeIcon(mode) {
   const icons = {
     truck: '🚛',
-    rail: '🚂',
-    pipeline: '⛽'
+    rail: '🚂'
   };
   return icons[mode] || icons.truck;
 }
@@ -569,8 +567,7 @@ function getTransportModeIcon(mode) {
 function getTransportModeLineStyle(mode) {
   const styles = {
     truck: { weight: 4, dashArray: null, opacity: 0.8 },
-    rail: { weight: 6, dashArray: '10,5', opacity: 0.7 },
-    pipeline: { weight: 8, dashArray: null, opacity: 0.6 }
+    rail: { weight: 6, dashArray: '10,5', opacity: 0.7 }
   };
   return styles[mode] || styles.truck;
 }
@@ -635,7 +632,7 @@ router.get('/locations', async (req, res) => {
         name: 'Houston, TX',
         coordinates: [29.7604, -95.3698],
         type: 'major_port',
-        capabilities: ['truck', 'rail', 'pipeline'],
+        capabilities: ['truck', 'rail'],
         region: 'Gulf Coast',
         specialties: ['petrochemicals', 'LNG', 'crude_oil'],
         infrastructure: 'extensive'
@@ -644,7 +641,7 @@ router.get('/locations', async (req, res) => {
         name: 'New Orleans, LA',
         coordinates: [29.9511, -90.0715],
         type: 'major_port',
-        capabilities: ['truck', 'rail', 'pipeline'],
+        capabilities: ['truck', 'rail'],
         region: 'Gulf Coast',
         specialties: ['bulk_liquids', 'chemicals'],
         infrastructure: 'good'
@@ -704,7 +701,7 @@ router.get('/locations', async (req, res) => {
         name: 'Chicago, IL',
         coordinates: [41.8781, -87.6298],
         type: 'inland_hub',
-        capabilities: ['truck', 'rail', 'pipeline'],
+        capabilities: ['truck', 'rail'],
         region: 'Midwest',
         specialties: ['rail_junction', 'distribution'],
         infrastructure: 'extensive'
@@ -775,7 +772,7 @@ router.get('/capabilities/:location', async (req, res) => {
     // This would normally query a database
     // For now, return capabilities based on location type
     const locationCapabilities = {
-      transport_modes: ['truck', 'rail', 'pipeline'],
+      transport_modes: ['truck', 'rail'],
       fuel_handling: {
         hydrogen: { cryogenic: true, compressed: true },
         methanol: { bulk_liquid: true, iso_tanks: true },
@@ -811,18 +808,15 @@ router.get('/fuel-compatibility/:fuelType', async (req, res) => {
     const compatibility = {
       hydrogen: {
         truck: { compatible: true, requirements: ['Cryogenic equipment', 'Specialized trailers'] },
-        rail: { compatible: true, requirements: ['Specialized railcars', 'Safety protocols'] },
-        pipeline: { compatible: false, reason: 'Limited hydrogen pipeline infrastructure' }
+        rail: { compatible: true, requirements: ['Specialized railcars', 'Safety protocols'] }
       },
       methanol: {
         truck: { compatible: true, requirements: ['Standard chemical transport'] },
-        rail: { compatible: true, requirements: ['Chemical tank cars'] },
-        pipeline: { compatible: true, requirements: ['Compatible materials', 'Existing networks'] }
+        rail: { compatible: true, requirements: ['Chemical tank cars'] }
       },
       ammonia: {
         truck: { compatible: true, requirements: ['Refrigerated transport', 'Safety equipment'] },
-        rail: { compatible: true, requirements: ['Pressurized cars', 'Safety protocols'] },
-        pipeline: { compatible: true, requirements: ['Dedicated ammonia pipelines'] }
+        rail: { compatible: true, requirements: ['Pressurized cars', 'Safety protocols'] }
       }
     };
 

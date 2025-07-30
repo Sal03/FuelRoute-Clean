@@ -89,13 +89,6 @@ class MarketDataService {
             final_rate: baseRates.rail * (1 + (surcharges.rail || 0.15)) * laborAdjustment,
             unit: 'USD_per_ton_mile',
             timestamp: new Date().toISOString()
-          },
-          ship: {
-            base_rate: baseRates.ship,
-            fuel_surcharge: surcharges.ship || 0.20,
-            final_rate: baseRates.ship * (1 + (surcharges.ship || 0.20)),
-            unit: 'USD_per_ton_mile',
-            timestamp: new Date().toISOString()
           }
         };
       } catch (error) {
@@ -114,19 +107,17 @@ class MarketDataService {
       
       return {
         truck: 0.15 + (surchargeMultiplier * 0.1), // Base 15% + variable
-        rail: 0.10 + (surchargeMultiplier * 0.05), // Base 10% + variable
-        ship: 0.12 + (surchargeMultiplier * 0.08)  // Base 12% + variable
+        rail: 0.10 + (surchargeMultiplier * 0.05)  // Base 10% + variable
       };
     } catch (error) {
-      return { truck: 0.25, rail: 0.15, ship: 0.20 };
+      return { truck: 0.25, rail: 0.15 };
     }
   }
 
   getDefaultRates() {
     return {
       truck: 2.85,
-      rail: 1.12,
-      ship: 0.67
+      rail: 1.12
     };
   }
 
@@ -183,7 +174,6 @@ class MarketDataService {
     return {
       weather_impact: isWinter ? 1.15 : isSummer ? 1.05 : 1.0,
       demand_seasonality: isSummer ? 1.1 : 1.0,
-      shipping_conditions: isWinter ? 1.1 : 1.0,
       holiday_factor: month === 12 ? 1.2 : 1.0
     };
   }
@@ -198,8 +188,7 @@ class MarketDataService {
       },
       transport_rate_volatility: {
         truck: 'high',     // Labor and fuel sensitive
-        rail: 'medium',    // More stable, long-term contracts
-        ship: 'high'      // Fuel and demand sensitive
+        rail: 'medium'    // More stable, long-term contracts
       },
       overall_market_trend: 'stable_with_upward_pressure'
     };

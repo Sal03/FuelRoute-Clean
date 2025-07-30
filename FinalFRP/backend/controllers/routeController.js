@@ -53,11 +53,11 @@ function validateNumber(value, fieldName = 'value', defaultValue = 0) {
 }
 
 // ✅ HELPER: Get fuel multiplier
-function getFuelMultiplier(fuelType, mode = 'general') {
+function getFuelMultiplier(fuelType) {
   const multipliers = {
-    hydrogen: mode === 'pipeline' ? 1.3 : 1.4,
-    ammonia: mode === 'pipeline' ? 1.2 : 1.3,
-    methanol: mode === 'pipeline' ? 1.1 : 1.15,
+    hydrogen: 1.4,
+    ammonia: 1.3,
+    methanol: 1.15,
     gasoline: 1.0,
     diesel: 1.05
   };
@@ -290,8 +290,6 @@ function calculateRailCost(volume, distance, fuelType, transportFactors, aiEnhan
   }
 }
 
-// ✅ NEW: Ship cost calculation - FIXED for NaN issues
-
 // ✅ NEW: Generic cost calculation for unknown modes
 function calculateGenericCost(volume, distance, mode, fuelType, aiEnhanced) {
   try {
@@ -351,9 +349,8 @@ const cityDatabase = {
 
 // ✅ Use realistic market rates
 const transportRates = {
-  truck: 0.25,    // $0.25 per tonne-mile 
-  rail: 0.15,     // $0.15 per tonne-mile
-  pipeline: 0.05  // $0.05 per tonne-mile
+  truck: 0.25,    // $0.25 per tonne-mile
+  rail: 0.15     // $0.15 per tonne-mile
 };
 
 // ✅ Enhanced commodity pricing with market data
@@ -700,8 +697,6 @@ function generateRouteAdvantages(route) {
     advantages.push('Fast delivery', 'Door-to-door service', 'Flexible scheduling');
   } else if (route.mode === 'rail') {
     advantages.push('Environmentally friendly', 'High capacity', 'Weather independent');
-  } else if (route.mode === 'pipeline') {
-    advantages.push('Continuous flow', 'Lowest operating cost', 'Weather independent');
   }
   
   // Route-specific advantages
@@ -770,7 +765,6 @@ function getEstimatedSpeed(transportMode) {
   const speeds = {
     truck: 55,
     rail: 25,
-    pipeline: 100
   };
   return speeds[transportMode] || 30;
 }
@@ -813,8 +807,7 @@ function getCachedDistance(origin, destination, transportMode, baseDistance) {
   // Use deterministic multipliers
   const modeMultipliers = {
     truck: 1.0,     // Direct route
-    rail: 1.15,     // Rail network routing (+15%)
-    pipeline: 0.92  // More direct underground (-8%)
+    rail: 1.15     // Rail network routing (+15%)
   };
   
   const calculatedDistance = Math.round(baseDistance * (modeMultipliers[transportMode] || 1.0));
@@ -1030,68 +1023,6 @@ async function generateRailOption(routeData, baseDistance) {
 }
 
 
-// ✅ UPDATED: Pipeline option with all-in pricing  
-async function generatePipelineOption(routeData, baseDistance) {
-  const { volume, fuelType, origin, destination } = routeData;
-  
-  try {
-    const pipelineDistance = await calculateDistance(origin, destination, 'pipeline');
-    const transportCostResult = await calculateBasicCost(volume, pipelineDistance, 'pipeline', fuelType);
-    const transportCost = transportCostResult.cost || transportCostResult;
-    
-    // ✅ ADD COMMODITY COST
-    const commodityInfo = getCommodityCost(fuelType, volume, transportCostResult.fuelPrice);
-    const allInCost = transportCost + commodityInfo.totalCost;
-    
-    return {
-      id: 'pipeline-direct',
-      type: 'direct',
-      name: 'Pipeline Transport',
-      transportModes: ['pipeline'],
-      estimatedTime: Math.ceil(pipelineDistance / 1000) + ' days',
-      
-      // ✅ SHOW ALL-IN COST
-      estimatedCost: allInCost,
-      
-      // ✅ ADD BREAKDOWN
-      costBreakdown: {
-        transportCost: transportCost,
-        commodityCost: commodityInfo.totalCost,
-        totalCost: allInCost
-      },
-      
-      distance: pipelineDistance,
-      riskLevel: 'low',
-      description: 'Pipeline transport - All-in pricing including fuel',
-      advantages: ['Fastest delivery', 'Continuous flow', 'Weather independent', 'Includes fuel cost'],
-      considerations: ['Requires existing pipeline infrastructure', 'Limited to liquid fuels'],
-      aiEnhanced: transportCostResult.aiEnhanced || false,
-      aiFactors: transportCostResult.aiFactors || null
-    };
-  } catch (error) {
-    console.error('Pipeline option generation failed:', error);
-    // Fallback calculation
-    const fallbackDistance = baseDistance * 0.92; // Pipeline multiplier
-    const fallbackCost = calculateRealisticFallback(volume, fallbackDistance, 'pipeline', fuelType);
-    const commodityInfo = getCommodityCost(fuelType, volume);
-    
-    return {
-      id: 'pipeline-direct',
-      type: 'direct',
-      name: 'Pipeline Transport',
-      transportModes: ['pipeline'],
-      estimatedTime: Math.ceil(fallbackDistance / 1000) + ' days',
-      estimatedCost: fallbackCost + commodityInfo.totalCost,
-      distance: Math.round(fallbackDistance),
-      riskLevel: 'low',
-      description: 'Pipeline transport - All-in pricing including fuel (estimated)',
-      advantages: ['Fastest delivery', 'Continuous flow', 'Weather independent', 'Includes fuel cost'],
-      considerations: ['Requires existing pipeline infrastructure', 'Limited to liquid fuels'],
-      aiEnhanced: false,
-      aiFactors: null
-    };
-  }
-}
 
 // ✅ NEW: Truck cost calculation
 async function calculateDistance(origin, destination, transportMode = 'truck', fuelType = 'methanol') {
@@ -1545,11 +1476,6 @@ function calculateDetailedFallbackForRoute(routeOption, routeData) {
     terminalFees = baseTransportCost * 0.03;    // 3% for rail terminals  
     hubTransferFee = baseTransportCost * 0.02;  // 2% for rail yard transfers
     console.log('💰 Using rail-focused fee calculation');
-  } else if (routeOption.name.toLowerCase().includes('pipeline')) {
-    fuelHandlingFee = baseTransportCost * 0.02; // 2% for pipeline handling
-    terminalFees = baseTransportCost * 0.01;    // 1% for connection terminals
-    hubTransferFee = baseTransportCost * 0.005; // 0.5% for pipeline transfers
-    console.log('💰 Using pipeline-focused fee calculation');
   } else if (routeOption.transportModes.includes('truck')) {
     fuelHandlingFee = baseTransportCost * 0.05; // 5% for truck handling
     terminalFees = baseTransportCost * 0.02;    // 2% for truck terminals
@@ -1788,43 +1714,6 @@ async function generateRailOptionWithAI(routeData, baseDistance) {
   }
 }
 
-// AI-Enhanced pipeline option generation
-async function generatePipelineOptionWithAI(routeData, baseDistance) {
-  const { volume, fuelType, origin, destination } = routeData;
-  
-  try {
-    const pipelineDistance = await calculateDistance(origin, destination, 'pipeline');
-    let transportFactors = null;
-    
-    if (openaiService && openaiService.isAvailable) {
-      transportFactors = await openaiService.getTransportCostFactors('pipeline', fuelType, pipelineDistance);
-    }
-    
-    const transportCostResult = await calculateBasicCost(volume, pipelineDistance, 'pipeline', fuelType);
-    const transportCost = transportCostResult.cost || transportCostResult;
-    
-    return {
-      id: 'pipeline-direct-ai',
-      type: 'direct',
-      name: 'AI-Optimized Pipeline Transport',
-      transportModes: ['pipeline'],
-      estimatedTime: Math.ceil(pipelineDistance / 1000) + ' days',
-      estimatedCost: transportCost,
-      distance: pipelineDistance,
-      riskLevel: 'low',
-      description: 'AI-optimized pipeline transport with dynamic flow management',
-      advantages: ['AI flow optimization', 'Real-time capacity management', 'Weather independent'],
-      considerations: ['Pipeline infrastructure required', 'AI-optimized scheduling', 'Continuous monitoring'],
-      aiEnhanced: true,
-      aiFactors: transportFactors || { note: 'Using static rates - AI unavailable' }
-    };
-    
-  } catch (error) {
-    console.error('AI pipeline option generation failed:', error);
-    return generatePipelineOption(routeData, baseDistance);
-  }
-}
-
 // AI-Enhanced multi-modal options generation
 async function generateMultiModalOptionsWithAI(routeData, baseDistance) {
   const { volume, fuelType, origin, destination } = routeData;
@@ -1833,9 +1722,7 @@ async function generateMultiModalOptionsWithAI(routeData, baseDistance) {
   console.log(`🔄 Generating AI-enhanced multi-modal combinations for ${baseDistance} mile route`);
   
   try {
-    // COMBINATION 1: AI-Optimized Truck + Ship
-    
-    // COMBINATION 2: AI-Optimized Truck + Rail
+    // COMBINATION 1: AI-Optimized Truck + Rail
     if (baseDistance > 600) {
       const railDistance = await calculateDistance(origin, destination, 'rail');
       const truckToRailDistance = Math.min(150, railDistance * 0.08);

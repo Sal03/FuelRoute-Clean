@@ -62,7 +62,7 @@ async function testAIConnection() {
         },
         {
           role: 'user',
-          content: 'Calculate the cost to transport 10 tonnes of hydrogen from LAX to Taipei via truck and ship.'
+          content: 'Calculate the cost to transport 10 tonnes of hydrogen from LAX to Taipei via truck.'
         }
       ],
       max_tokens: 200,

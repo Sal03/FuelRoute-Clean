@@ -12,28 +12,6 @@ if (process.env.OPENAI_API_KEY) {
 }
 
 // ✅ GEOCODING DATA AND FUNCTIONS (Simple version)
-const pipelineRoutes = [
-  {
-    hub: "Houston, TX",
-    connections: ["Dallas, TX", "Oklahoma City, OK", "Kansas City, MO"],
-    type: "static_route"
-  },
-  {
-    hub: "New Orleans, LA", 
-    connections: ["Baton Rouge, LA", "Jackson, MS", "Memphis, TN"],
-    type: "static_route"
-  },
-  {
-    hub: "Los Angeles, CA",
-    connections: ["Las Vegas, NV", "Phoenix, AZ", "Bakersfield, CA"],
-    type: "static_route"
-  },
-  {
-    hub: "Chicago, IL",
-    connections: ["Detroit, MI", "Milwaukee, WI", "Indianapolis, IN"],
-    type: "static_route"
-  }
-];
 
 function verifyLocation(location, transportMode, fuelType) {
   console.log(`🌍 Verifying ${location} for ${transportMode} transport of ${fuelType}`);
@@ -49,11 +27,6 @@ function verifyLocation(location, transportMode, fuelType) {
     suitable = ports.some(port => locationLower.includes(port));
     infrastructure = suitable ? 'major_port' : 'no_port_access';
     if (!suitable) warnings.push('Ship transport requires port access');
-  } else if (transportMode === 'pipeline') {
-    const hubs = ['houston', 'new orleans', 'chicago', 'los angeles'];
-    suitable = hubs.some(hub => locationLower.includes(hub));
-    infrastructure = suitable ? 'pipeline_hub' : 'no_pipeline_access';
-    if (!suitable) warnings.push('No known pipeline access');
   }
   
   return {
@@ -95,9 +68,7 @@ router.get('/transport-modes', (req, res) => {
     success: true,
     data: [
       { id: 'truck', name: 'Truck', capacity: '8-12 tonnes', speed: 'Fast' },
-      { id: 'rail', name: 'Rail', capacity: '50+ tonnes', speed: 'Medium' },
-      { id: 'ship', name: 'Ship', capacity: '1000+ tonnes', speed: 'Slow' },
-      { id: 'pipeline', name: 'Pipeline', capacity: 'Unlimited', speed: 'Continuous' }
+      { id: 'rail', name: 'Rail', capacity: '50+ tonnes', speed: 'Medium' }
     ]
   });
 });
@@ -132,21 +103,6 @@ router.get('/geocoding/test/:location', (req, res) => {
   }
 });
 
-router.get('/geocoding/pipeline-routes', (req, res) => {
-  try {
-    res.json({
-      success: true,
-      data: pipelineRoutes,
-      message: 'Pipeline routes retrieved successfully'
-    });
-  } catch (error) {
-    console.error('❌ Pipeline routes error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to get pipeline routes'
-    });
-  }
-});
 
 router.post('/geocoding/verify', (req, res) => {
   try {
