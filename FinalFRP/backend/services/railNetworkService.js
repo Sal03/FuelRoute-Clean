@@ -107,8 +107,16 @@ class RailNetworkService {
       'Chicago, IL-St. Louis, MO': 284,
       'Chicago, IL-Memphis, TN': 341,
       'Chicago, IL-Duluth-Superior, MN/WI': 465,
-      'St. Louis, MO-Memphis, TN': 305,
-      'Memphis, TN-New Orleans, LA': 395
+    'St. Louis, MO-Memphis, TN': 305,
+    'Memphis, TN-New Orleans, LA': 395
+  };
+
+    // Known realistic rail paths for major city pairs
+    this.realisticPaths = {
+      'Seattle, WA-Chicago, IL': ['Seattle, WA', 'Portland, OR', 'Chicago, IL'],
+      'Chicago, IL-Seattle, WA': ['Chicago, IL', 'Portland, OR', 'Seattle, WA'],
+      'Houston, TX-Chicago, IL': ['Houston, TX', 'St. Louis, MO', 'Chicago, IL'],
+      'Chicago, IL-Houston, TX': ['Chicago, IL', 'St. Louis, MO', 'Houston, TX']
     };
 
     this.isAvailable = true;
@@ -210,6 +218,15 @@ class RailNetworkService {
   }
 
   createRailRouteResponse(origin, destination, distance, path, routingMethod = 'network_routing') {
+    // Replace simple origin-destination path with known realistic path if available
+    const directKey = `${origin}-${destination}`;
+    const reverseKey = `${destination}-${origin}`;
+    if (this.realisticPaths[directKey]) {
+      path = this.realisticPaths[directKey];
+    } else if (this.realisticPaths[reverseKey]) {
+      path = [...this.realisticPaths[reverseKey]].reverse();
+    }
+
     const avgSpeed = 25;
     const transitTime = Math.round((distance / avgSpeed) * 10) / 10;
     const terminalTime = path.length * 8;
