@@ -387,7 +387,7 @@ const validateLocationBasic = (location, fieldName) => {
         if (originInfo.region === destInfo.region) {
           routeType = 'regional';
         } else if (originInfo.region !== destInfo.region) {
-          routeType = 'international';
+          routeType = 'long';
         }
         
         // Enhanced insights based on AI analysis
@@ -400,9 +400,9 @@ const validateLocationBasic = (location, fieldName) => {
           if (routeType === 'regional' && volumeInTonnes <= 5) {
             insights = `🚛 Short distance within ${originInfo.region}: Truck transport recommended for cost efficiency.`;
           } else if (volumeInTonnes > 10) {
-            insights = `🚢 For 10+ tonnes: Rail or Ship transport recommended for cost efficiency and environmental benefits. Large volumes benefit from bulk transport modes with lower per-unit costs.`;
-          } else if (routeType === 'international') {
-            insights = `🌍 International route (${originInfo.region} → ${destInfo.region}): Ship transport recommended via intermediate hub for optimal cost and safety.`;
+            insights = `🚢 For 10+ tonnes: Rail transport recommended for cost efficiency and environmental benefits. Large volumes benefit from bulk transport modes with lower per-unit costs.`;
+          } else if (routeType === 'long') {
+            insights = `Long route (${originInfo.region} → ${destInfo.region}): Rail transport recommended via intermediate hub for optimal cost and safety.`;
           } else if (volumeInTonnes > 15) {
             insights = `🚆 Large volume transport: Consider rail for cost efficiency.`;
           }
@@ -425,18 +425,14 @@ const validateLocationBasic = (location, fieldName) => {
           if (volumeInTonnes <= 5) {
             insights = 'Small volume: Truck transport typically most cost-effective for shorter distances.';
           } else if (volumeInTonnes > 10) {
-            insights = 'For 10+ tonnes: Rail or Ship transport recommended for cost efficiency and environmental benefits.';
+            insights = 'For 10+ tonnes: Rail transport recommended for cost efficiency and environmental benefits.';
           }
         }
       }
       
       // Validate transport modes with AI insights
-      if (routeType === 'international' && formData.transportMode1 === 'truck' && !formData.intermediateHub) {
-        errors.transport = 'International truck transport requires an intermediate hub or consider rail transport for cross-continental delivery';
-      }
-      
-      if (originInfo?.type === 'port' && destInfo?.type === 'port' && formData.transportMode1 === 'truck') {
-        insights += ' 🚢 Port-to-port route: Ship transport may be more efficient.';
+      if (routeType === 'long' && formData.transportMode1 === 'truck' && !formData.intermediateHub) {
+        errors.transport = 'Long truck transport requires an intermediate hub or consider rail transport for cross-continental delivery';
       }
     }
     
@@ -636,11 +632,11 @@ const validateLocationBasic = (location, fieldName) => {
                   dest.includes('usa') || dest.includes('united states');
   
     if (originUS && destUS) {
-      console.log('✅ General US domestic route detected');
+      console.log('✅ General Short route detected');
       return true;
     }
   
-    console.log('❌ International route detected');
+    console.log('❌ Long route detected');
     return false;
   };
 
@@ -653,7 +649,7 @@ const validateLocationBasic = (location, fieldName) => {
     
     // Show second transport mode ONLY if:
     // 1. There's an actual intermediate hub provided, OR
-    // 2. It's NOT a short route (meaning it's international/long route) AND no intermediate hub
+    // 2. It's NOT a short route (meaning it's long route) AND no intermediate hub
     const shouldShow = hasIntermediateHub || (!isShort && !hasIntermediateHub);
     
     console.log('🚦 Should show second transport mode:', shouldShow);
@@ -949,7 +945,7 @@ const validateLocationBasic = (location, fieldName) => {
                   value={formData.origin}
                   onChange={handleInputChange}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter origin (e.g., Los Angeles, CA)"
+                  placeholder="Enter origin"
                   required
                   list="origin-suggestions"
                 />
@@ -989,7 +985,7 @@ const validateLocationBasic = (location, fieldName) => {
                   value={formData.destination}
                   onChange={handleInputChange}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter destination (e.g., Tokyo, Japan or Dubai, UAE)"
+                  placeholder="Enter destination"
                   required
                   list="destination-suggestions"
                 />
@@ -1081,7 +1077,7 @@ const validateLocationBasic = (location, fieldName) => {
                     Transport Mode (Second Leg) 
                     {(formData.intermediateHub && formData.intermediateHub.trim() !== '') ? 
                       ' (To Final Destination)' : 
-                      ' (International/Long Route)'}
+                      ' (Long Route)'}
                   </label>
                   <select
                     name="transportMode2"
@@ -1094,10 +1090,10 @@ const validateLocationBasic = (location, fieldName) => {
                     ))}
                   </select>
                   
-                  {/* Show helpful text for international routes without intermediate hub */}
+                  {/* Show helpful text for long routes without intermediate hub */}
                   {!isShortRoute() && (!formData.intermediateHub || formData.intermediateHub.trim() === '') && (
                     <p className="text-xs text-blue-600 mt-1">
-                      💡 International route: Ship transport recommended via intermediate hub for optimal cost and safety.
+                      💡 Long route: Rail transport recommended via intermediate hub for optimal cost and safety.
                     </p>
                   )}
                 </div>
