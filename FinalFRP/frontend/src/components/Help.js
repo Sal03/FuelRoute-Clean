@@ -29,7 +29,6 @@ const Help = () => {
     // Fuel Types
     { text: 'Hydrogen transportation', action: 'faq', target: 'ai-features', description: 'Learn about hydrogen transport' },
     { text: 'Methanol logistics', action: 'faq', target: 'transport-modes', description: 'Methanol transportation info' },
-    { text: 'Ammonia shipping', action: 'faq', target: 'transport-modes', description: 'Ammonia shipping information' },
     { text: 'Alternative fuels', action: 'faq', target: 'getting-started', description: 'Information about supported fuels' },
     
     // Transport Modes
@@ -37,7 +36,6 @@ const Help = () => {
     { text: 'Multi-modal transport', action: 'faq', target: 'transport-modes', description: 'Multiple transport modes' },
     { text: 'Truck transport', action: 'faq', target: 'transport-modes', description: 'Truck transportation info' },
     { text: 'Rail transport', action: 'faq', target: 'transport-modes', description: 'Rail transportation info' },
-    { text: 'Ship transport', action: 'faq', target: 'transport-modes', description: 'Maritime shipping info' },
     { text: 'Pipeline transport', action: 'faq', target: 'transport-modes', description: 'Pipeline transportation info' },
     
     // AI Features
@@ -112,7 +110,7 @@ const Help = () => {
     {
       category: 'calculations',
       question: 'What factors influence transportation costs?',
-      answer: 'Key factors include: fuel type and volume, transport distance, transport modes (truck, rail, ship, pipeline), fuel handling complexity, safety requirements, insurance, and regulatory compliance.'
+      answer: 'Key factors include: fuel type and volume, transport distance, transport modes (truck, rail, pipeline), fuel handling complexity, safety requirements, insurance, and regulatory compliance.'
     },
     {
       category: 'ai-features',
@@ -127,12 +125,12 @@ const Help = () => {
     {
       category: 'transport-modes',
       question: 'Which transport mode should I choose?',
-      answer: 'Truck: Best for short distances (<500 miles). Rail: Cost-effective for medium distances. Ship: Optimal for long distances and large volumes. Pipeline: Most efficient for established routes.'
+      answer: 'Truck: Best for short distances (<500 miles). Rail: Cost-effective for medium distances. Pipeline: Most efficient for established routes.'
     },
     {
       category: 'transport-modes',
       question: 'Can I use multiple transport modes?',
-      answer: 'Yes! Our multi-modal calculator supports complex routes with intermediate hubs. For example: truck to port, then ship to destination port, then truck to final destination.'
+      answer: 'Yes! Our multi-modal calculator supports complex routes with intermediate hubs. For example: truck to rail terminal then rail to destination, with truck delivery at the end.'
     },
     {
       category: 'troubleshooting',

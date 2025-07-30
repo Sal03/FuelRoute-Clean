@@ -1,6 +1,6 @@
 # 🚛 FuelRoute-Pro
 
-**FuelRoute-Pro** is a smart fuel transportation cost estimator that calculates route-based costs across truck, rail, and ship modes. It intelligently evaluates distances, commodity weights, and transit times to give users actionable insights into fuel logistics.
+**FuelRoute-Pro** is a smart fuel transportation cost estimator that calculates route-based costs across truck and rail modes. It intelligently evaluates distances, commodity weights, and transit times to give users actionable insights into fuel logistics.
 
 ---
 

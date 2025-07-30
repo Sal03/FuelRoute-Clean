@@ -84,8 +84,7 @@ app.get('/', (req, res) => {
     features: [
       'AI-powered cost calculation',
       'Real-time routing via Google Maps',
-      'US rail network routing',
-      'Maritime shipping routes'
+      'US rail network routing'
     ]
   });
 });
