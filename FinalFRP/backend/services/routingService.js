@@ -45,15 +45,24 @@ async function calculateDistance(origin, destination, transportMode = 'truck', f
   }
 }
 
-// Helper function to calculate duration
+// Helper function to calculate duration with realistic speeds
 function calculateDurationHours(distance, transportMode) {
   const speeds = {
     truck: 55,    // mph average including stops
-    rail: 25      // mph freight rail average
+    rail: 45      // mph freight rail average (improved from 25)
   };
   
   const speed = speeds[transportMode] || 30;
-  return Math.round((distance / speed) * 10) / 10;
+  const duration = distance / speed;
+  
+  // Add realistic delays
+  if (transportMode === 'rail') {
+    // Add 2-4 hours for rail yard operations and switching
+    const yardTime = Math.min(4, Math.max(2, distance / 500));
+    return Math.round((duration + yardTime) * 10) / 10;
+  }
+  
+  return Math.round(duration * 10) / 10;
 }
 
 // Coordinate-based estimation fallback
@@ -286,7 +295,7 @@ class RoutingService {
   getEstimatedSpeed(transportMode) {
     const speeds = {
       truck: 55,
-      rail: 25
+      rail: 45  // Improved from 25 to be more realistic
     };
     return speeds[transportMode] || 30;
   }

@@ -65,6 +65,68 @@ function getFuelMultiplier(fuelType) {
   return multipliers[fuelType] || 1.2;
 }
 
+// ✅ NEW: Calculate truck requirements with detailed information
+function calculateTruckRequirements(volume, fuelType) {
+  try {
+    // Truck capacity based on fuel type (in tonnes)
+    const truckCapacities = {
+      hydrogen: 8,    // Compressed hydrogen trucks
+      methanol: 12,   // Standard liquid fuel trucks
+      ammonia: 10,    // Refrigerated trucks for ammonia
+      gasoline: 12,   // Standard fuel trucks
+      diesel: 12,     // Standard fuel trucks
+      ethanol: 12     // Standard fuel trucks
+    };
+    
+    const maxCapacity = truckCapacities[fuelType] || 10; // Default capacity
+    const trucksNeeded = Math.max(1, Math.ceil(volume / maxCapacity));
+    const utilizationPercent = Math.round((volume / (trucksNeeded * maxCapacity)) * 100);
+    
+    // Generate detailed message
+    let message = `🚛 **${trucksNeeded} truck${trucksNeeded > 1 ? 's' : ''} required** for ${volume} tonnes of ${fuelType}`;
+    
+    if (trucksNeeded === 1) {
+      message += ` (${utilizationPercent}% truck utilization)`;
+    } else {
+      message += ` (${maxCapacity} tonnes capacity per truck)`;
+    }
+    
+    // Add fuel-specific handling requirements
+    const handlingRequirements = {
+      hydrogen: "⚠️ Requires specialized cryogenic transport (-253°C)",
+      methanol: "⚠️ Requires hazmat certified drivers and equipment",
+      ammonia: "⚠️ Requires refrigerated transport and toxic gas protocols",
+      gasoline: "Standard fuel transport protocols",
+      diesel: "Standard fuel transport protocols",
+      ethanol: "Standard fuel transport with ethanol compatibility"
+    };
+    
+    const handlingNote = handlingRequirements[fuelType] || "Standard transport protocols";
+    
+    return {
+      trucksNeeded,
+      maxCapacity,
+      totalCapacity: trucksNeeded * maxCapacity,
+      utilizationPercent,
+      excessCapacity: (trucksNeeded * maxCapacity) - volume,
+      message,
+      handlingNote,
+      fuelType,
+      volume
+    };
+    
+  } catch (error) {
+    console.error('❌ Truck requirements calculation error:', error);
+    return {
+      trucksNeeded: Math.max(1, Math.ceil(volume / 10)),
+      maxCapacity: 10,
+      message: `🚛 Approximately ${Math.max(1, Math.ceil(volume / 10))} trucks required`,
+      handlingNote: "Standard transport protocols",
+      error: error.message
+    };
+  }
+}
+
 // ✅ UPDATED: Enhanced cost calculation with proper validation and AI integration
 async function calculateBasicCost(volume, distance, mode, fuelType) {
   try {
@@ -132,8 +194,14 @@ async function calculateBasicCost(volume, distance, mode, fuelType) {
         }
         
       } catch (error) {
-        console.log(`⚠️ OpenAI services failed, using fallback: ${error.message}`);
-        // Don't throw here, just continue with fallback
+        console.log(`⚠️ OpenAI services failed: ${error.message}`);
+        // For critical failures, we should still try to get some AI data
+        // Only use fallback if OpenAI is completely unavailable
+        if (error.message.includes('API key') || error.message.includes('authentication')) {
+          console.log('❌ OpenAI authentication failed - using fallback');
+        } else {
+          console.log('🔄 OpenAI temporary failure - will retry on next request');
+        }
       }
     } else {
       console.log('⚠️ OpenAI service not available, using static pricing');
@@ -1314,6 +1382,9 @@ if (aiAvailable && routeOptions.length > 1) {
       }
     }
 
+    // Calculate truck requirements for the shipment
+    const truckRequirements = calculateTruckRequirements(routeData.volume, routeData.fuelType);
+    
     // Return multiple route options with AI enhancement indicators
     const responseData = {
       success: true,
@@ -1327,6 +1398,10 @@ if (aiAvailable && routeOptions.length > 1) {
       },
       routeOptions: aiOptimizedOptions || routeOptions,
       aiRecommendation: aiRecommendation,
+      
+      // ✅ NEW: Prominent truck requirements information
+      truckRequirements: truckRequirements,
+      
       summary: {
         totalOptions: routeOptions.length,
         aiEnhanced: routeOptions.filter(r => r.aiEnhanced).length,
@@ -1768,5 +1843,6 @@ module.exports = {
   calculateMultiModalCost,
   validateNumber,
   getRouteHistory,
-  generateRouteOptions
+  generateRouteOptions,
+  calculateTruckRequirements
 };

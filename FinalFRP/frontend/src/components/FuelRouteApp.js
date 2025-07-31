@@ -937,6 +937,41 @@ const validateLocationBasic = (location, fieldName) => {
                 </div>
               </div>
 
+              {/* ✅ NEW: Real-time Truck Requirements Display */}
+              {formData.volume && parseFloat(formData.volume) > 0 && formData.fuelType && (
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-blue-600">🚛</span>
+                    <h4 className="font-medium text-blue-800">Quick Truck Requirements</h4>
+                  </div>
+                  {(() => {
+                    const volumeInTonnes = parseFloat(formData.volume) * (volumeUnits.find(u => u.value === formData.volumeUnit)?.factor || 1);
+                    const truckCapacities = {
+                      hydrogen: 8,
+                      methanol: 12,
+                      ammonia: 10,
+                      gasoline: 12,
+                      diesel: 12,
+                      ethanol: 12
+                    };
+                    const maxCapacity = truckCapacities[formData.fuelType] || 10;
+                    const trucksNeeded = Math.max(1, Math.ceil(volumeInTonnes / maxCapacity));
+                    const utilizationPercent = Math.round((volumeInTonnes / (trucksNeeded * maxCapacity)) * 100);
+                    
+                    return (
+                      <div className="text-sm text-blue-700">
+                        <div className="font-medium">
+                          {trucksNeeded} truck{trucksNeeded > 1 ? 's' : ''} required for {volumeInTonnes.toFixed(1)} tonnes of {formData.fuelType}
+                        </div>
+                        <div className="text-xs mt-1">
+                          {maxCapacity} tonnes capacity per truck • {utilizationPercent}% utilization
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
               {/* Origin */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1140,11 +1175,7 @@ const validateLocationBasic = (location, fieldName) => {
 
               {/* Calculator Mode Selection */}
               <div className="bg-gray-50 p-3 rounded-md mb-4">
-                <div className="text-sm font-medium text-gray-700 mb-2">Calculator Mode:</div>
                 <div className="space-y-2">
-                  <div className="text-xs text-gray-600">
-                    <strong>Get Results:</strong> View all available route options with AI recommendations
-                  </div>
                 </div>
               </div>
 
@@ -1527,22 +1558,7 @@ const validateLocationBasic = (location, fieldName) => {
                       </div>
                     </div>
 
-                    {/* Market Insights */}
-                    {result.calculation.marketInsights && (
-                      <div className="bg-blue-50 border border-blue-200 rounded p-4">
-                        <h4 className="font-medium mb-2 text-blue-800">📈 Market Insights:</h4>
-                        <div className="space-y-2 text-sm text-blue-700">
-                          <div><strong>Recommendation:</strong> {result.calculation.marketInsights.recommendation}</div>
-                          {result.calculation.marketInsights.commodityNote && (
-                            <div><strong>Commodity:</strong> {result.calculation.marketInsights.commodityNote}</div>
-                          )}
-                          {result.calculation.marketInsights.transportNote && (
-                            <div><strong>Transport:</strong> {result.calculation.marketInsights.transportNote}</div>
-                          )}
-                          <div><strong>Market Trend:</strong> <span className="capitalize">{result.calculation.marketInsights.trend}</span></div>
-                        </div>
-                      </div>
-                    )}
+                    
 
                     {/* Confidence & Metadata */}
                     <div className="flex justify-between items-center text-sm text-gray-600 pt-4 border-t">

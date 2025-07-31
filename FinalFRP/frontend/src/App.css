@@ -772,6 +772,35 @@ body {
   background: #2563eb;
 }
 
+/* ✅ NEW: Documentation Button Styling */
+.documentation-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.documentation-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.documentation-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
 /* ✅ ENHANCED: Hero Section */
 .hero {
   background: var(--primary-gradient);
@@ -1924,6 +1953,22 @@ select {
   .footer-container {
     grid-template-columns: 1fr;
     text-align: center;
+  }
+  
+  /* Header responsive adjustments */
+  .header-right {
+    gap: 0.5rem;
+  }
+  
+  .documentation-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+    gap: 0.25rem;
+  }
+  
+  .cta-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
   }
   
   .nav-menu {

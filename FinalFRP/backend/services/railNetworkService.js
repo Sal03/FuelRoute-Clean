@@ -227,9 +227,9 @@ class RailNetworkService {
       path = [...this.realisticPaths[reverseKey]].reverse();
     }
 
-    const avgSpeed = 25;
+    const avgSpeed = 45; // Improved from 25 mph to realistic freight speed
     const transitTime = Math.round((distance / avgSpeed) * 10) / 10;
-    const terminalTime = path.length * 8;
+    const terminalTime = Math.min(6, path.length * 2); // Max 6 hours, 2 hours per terminal
     const totalTime = transitTime + terminalTime;
 
     console.log(`🚂 Rail route calculated: ${distance} mi via ${path.join(' → ')}, ${totalTime} hrs total`);

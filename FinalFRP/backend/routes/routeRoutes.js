@@ -55,6 +55,46 @@ router.post('/calculate-cost', calculateCost);
 router.post('/optimize-route', optimizeRoute);
 router.get('/routes', getRouteHistory);
 
+// ✅ NEW: Truck requirements calculation endpoint
+router.post('/truck-requirements', (req, res) => {
+  try {
+    const { volume, fuelType } = req.body;
+    
+    if (!volume || !fuelType) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: volume and fuelType'
+      });
+    }
+    
+    const volumeNum = parseFloat(volume);
+    if (isNaN(volumeNum) || volumeNum <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Volume must be a positive number'
+      });
+    }
+    
+    // Import the function from controller
+    const { calculateTruckRequirements } = require('../controllers/routeController');
+    const requirements = calculateTruckRequirements(volumeNum, fuelType.toLowerCase());
+    
+    res.json({
+      success: true,
+      data: requirements,
+      message: requirements.message
+    });
+    
+  } catch (error) {
+    console.error('❌ Truck requirements calculation error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to calculate truck requirements',
+      message: error.message
+    });
+  }
+});
+
 // ✅ BASIC API ROUTES
 router.get('/fuel-types', (req, res) => {
   res.json({
@@ -167,6 +207,66 @@ router.get('/test-openai-price/:fuelType', async (req, res) => {
       error: 'OpenAI test failed',
       message: error.message,
       suggestion: 'Check your OpenAI API key and credits'
+    });
+  }
+});
+
+// ✅ CACHE MANAGEMENT ROUTES
+router.post('/clear-price-cache', (req, res) => {
+  try {
+    const openaiService = require('../services/openaiService');
+    if (!openaiService) {
+      return res.status(503).json({
+        error: 'OpenAI service not available'
+      });
+    }
+    
+    // Clear the price cache
+    openaiService.priceCache.clear();
+    
+    res.json({
+      success: true,
+      message: 'Price cache cleared successfully. Next requests will fetch fresh prices from OpenAI.',
+      timestamp: new Date()
+    });
+    
+  } catch (error) {
+    console.error('Cache clear error:', error);
+    res.status(500).json({
+      error: 'Failed to clear cache',
+      message: error.message
+    });
+  }
+});
+
+router.get('/cache-status', (req, res) => {
+  try {
+    const openaiService = require('../services/openaiService');
+    if (!openaiService) {
+      return res.status(503).json({
+        error: 'OpenAI service not available'
+      });
+    }
+    
+    const cacheSize = openaiService.priceCache.size;
+    const cacheTimeout = openaiService.cacheTimeout;
+    
+    res.json({
+      success: true,
+      cache: {
+        size: cacheSize,
+        timeout: cacheTimeout,
+        timeoutFormatted: cacheTimeout === 0 ? 'Disabled (Real-time)' : `${cacheTimeout / 1000} seconds`,
+        entries: Array.from(openaiService.priceCache.keys())
+      },
+      message: cacheTimeout === 0 ? 'Cache disabled - using real-time pricing' : 'Cache enabled'
+    });
+    
+  } catch (error) {
+    console.error('Cache status error:', error);
+    res.status(500).json({
+      error: 'Failed to get cache status',
+      message: error.message
     });
   }
 });

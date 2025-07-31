@@ -177,6 +177,9 @@ function App() {
           
           <div className="header-right">
             <div className="search-icon"></div>
+            <a href="fuelroute-documentation.html" target="_blank" rel="noopener noreferrer" className="documentation-button">
+               Documentation
+            </a>
             <a href="#calculator" className="cta-button">Try Calculator</a>
           </div>
         </div>
@@ -190,9 +193,8 @@ function App() {
             <p className="subtitle">AI-powered cost estimation for hydrogen, methanol, and ammonia logistics across all transport modes</p>
             <p className="description">Calculate transportation costs for hydrogen, methanol, and ammonia across multiple modes. Optimize routes, reduce costs, and accelerate the clean energy transition.</p>
             
-            <div className="hero-buttons">
-              <a href="#calculator" className="btn-primary">Start Calculating</a>
-            </div>
+            
+        
 
             <div className="hero-stats">
               <div className="stat-item">

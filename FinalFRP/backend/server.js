@@ -147,6 +147,7 @@ app.use('*', (req, res) => {
       'GET  /',
       'GET  /api/health',
       'POST /api/calculate-cost',
+      'POST /api/truck-requirements',
       'GET  /api/routes',
       'POST /api/payments',
       'GET  /api/routing/health',
