@@ -249,25 +249,16 @@ function App() {
       <footer className="footer">
         <div className="footer-container">
           <div className="footer-brand">
-            <div className="logo">FuelRoute Pro</div>
-            <p>FuelRoute Pro makes alternative fuel transportation cost-effective and efficient for logistics professionals and energy companies through AI-powered analysis and real-time market intelligence.</p>
+            
             <div className="social-links">
-              <a href="mailto:info@thampico.com" title="Email">📧</a>
-              <a href="https://www.linkedin.com/company/thampico/" target="_blank" rel="noopener noreferrer" title="LinkedIn">💼</a>
+              <a href="mailto:info@thampico.com" title="Email">Email</a>
+              <a href="https://www.linkedin.com/company/thampico/" target="_blank" rel="noopener noreferrer" title="LinkedIn">LinkedIn</a>
             
             </div>
           </div>
           
           <div className="footer-section">
-            <h3>Calculator</h3>
-            <ul>
-              <li><a href="#calculator">Cost Calculator</a></li>
-              <li><a href="#hydrogen">Hydrogen Transport</a></li>
-              <li><a href="#methanol">Methanol Logistics</a></li>
-              <li><a href="#ammonia">Ammonia Shipping</a></li>
-              <li><a href="#compare">Fuel Comparison</a></li>
-              <li><a href="#api">API Access</a></li>
-            </ul>
+            
           </div>
 
         </div>

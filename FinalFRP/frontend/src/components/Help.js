@@ -110,7 +110,7 @@ const Help = () => {
     {
       category: 'calculations',
       question: 'What factors influence transportation costs?',
-      answer: 'Key factors include: fuel type and volume, transport distance, transport modes (truck, rail, pipeline), fuel handling complexity, safety requirements, insurance, and regulatory compliance.'
+      answer: 'Key factors include: fuel type and volume, transport distance, transport modes (truck, rail), fuel handling complexity, safety requirements, insurance, and regulatory compliance.'
     },
     {
       category: 'ai-features',

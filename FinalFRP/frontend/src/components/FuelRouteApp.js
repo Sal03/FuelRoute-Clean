@@ -207,6 +207,11 @@ const handleMapRouteSelect = (selectedRoute) => {
     calculateDetailedCost(matchingRouteOption);
   }
 };
+  // Track route history changes
+  useEffect(() => {
+    console.log('🔄 Route history state updated:', routeHistory.length, 'entries');
+  }, [routeHistory]);
+
   // Route validation and insights
   useEffect(() => {
     if (formData.origin && formData.destination) {
@@ -750,6 +755,7 @@ const validateLocationBasic = (location, fieldName) => {
         setResult(response);
 
         const historyResponse = await getRouteHistory();
+        console.log('📊 Route history updated:', historyResponse.data?.length || 0, 'entries');
         setRouteHistory(historyResponse.data || []);
       }
 
@@ -809,6 +815,7 @@ const validateLocationBasic = (location, fieldName) => {
         await backendAPI.refreshHistory();
       } else {
         const historyResponse = await getRouteHistory();
+        console.log('📊 Detailed calc - Route history updated:', historyResponse.data?.length || 0, 'entries');
         setRouteHistory(historyResponse.data || []);
       }
 
@@ -867,12 +874,22 @@ const validateLocationBasic = (location, fieldName) => {
         
         <ApiStatusIndicator />
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="space-y-8">
           {/* Form Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Calculate Transport Cost - US Ports & Hubs</h2>
+          <div className="bg-white rounded-lg shadow-md p-6 max-w-lg mx-auto relative overflow-hidden">
+            {/* Floating Background Circles */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-4 left-8 w-12 h-12 bg-blue-100 rounded-full opacity-30 animate-bounce" style={{animationDelay: '0s', animationDuration: '3s'}}></div>
+              <div className="absolute top-16 right-12 w-8 h-8 bg-green-100 rounded-full opacity-40 animate-pulse" style={{animationDelay: '1s', animationDuration: '2s'}}></div>
+              <div className="absolute bottom-20 left-16 w-6 h-6 bg-purple-100 rounded-full opacity-35 animate-bounce" style={{animationDelay: '2s', animationDuration: '4s'}}></div>
+              <div className="absolute bottom-8 right-8 w-10 h-10 bg-indigo-100 rounded-full opacity-25 animate-pulse" style={{animationDelay: '0.5s', animationDuration: '3.5s'}}></div>
+              <div className="absolute top-32 left-4 w-4 h-4 bg-teal-100 rounded-full opacity-45 animate-bounce" style={{animationDelay: '1.5s', animationDuration: '2.5s'}}></div>
+              <div className="absolute bottom-32 right-20 w-14 h-14 bg-cyan-100 rounded-full opacity-20 animate-pulse" style={{animationDelay: '3s', animationDuration: '4s'}}></div>
+            </div>
             
-            <div className="space-y-4">
+          <h2 className="text-xl font-semibold mb-4 relative z-10">Calculate Transport Cost - US Ports & Hubs</h2>
+            
+            <div className="space-y-6 relative z-10">
               {/* Fuel Type */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1211,11 +1228,6 @@ const validateLocationBasic = (location, fieldName) => {
                     </span>
                   )}
                 </button>
-
-                <div className="text-center">
-                  <p className="text-sm text-gray-600 font-medium">Click above to calculate your route options</p>
-                  <p className="text-xs text-gray-500 mt-1">AI will analyze and provide the best transportation options</p>
-                </div>
               </div>
 
               {/* Error Display */}

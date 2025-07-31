@@ -1821,7 +1821,7 @@ select {
 .footer {
   background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
   color: white;
-  padding: 4rem 0 1rem;
+  padding: 2rem 0 1rem;
   position: relative;
 }
 
@@ -1832,7 +1832,7 @@ select {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(243, 11, 11, 0.2), transparent);
 }
 
 .footer-container {
